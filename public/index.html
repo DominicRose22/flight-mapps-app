@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Border Route</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="top-bar">
+  <div class="field">
+    <i class="dot origin"></i>
+    <input id="origin-input" type="text" placeholder="Choose starting point" autocomplete="off" />
+  </div>
+  <div class="field-divider"></div>
+  <div class="field">
+    <i class="dot destination"></i>
+    <input id="destination-input" type="text" placeholder="Choose destination" autocomplete="off" />
+  </div>
+</div>
+
+<div class="mode-row" id="mode-row">
+  <button class="mode-pill" data-mode="driving">
+    <span class="icon">🚗</span><span class="label">--</span>
+  </button>
+  <button class="mode-pill" data-mode="walking">
+    <span class="icon">🚶</span><span class="label">--</span>
+  </button>
+  <button class="mode-pill" data-mode="transit">
+    <span class="icon">🚆</span><span class="label">--</span>
+  </button>
+  <button class="mode-pill" data-mode="flight">
+    <span class="icon">✈️</span><span class="label">--</span>
+  </button>
+</div>
+
+<div class="date-row" id="date-row">
+  <label for="depart-date">Depart</label>
+  <input type="date" id="depart-date" />
+  <label for="depart-time">Time</label>
+  <input type="time" id="depart-time" value="10:00" />
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div id="sheet-content" class="sheet-content">
+    <p class="sheet-empty">Enter a starting point and a destination to see routes.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const CONFIG = {
+    GOOGLE_MAPS_API_KEY: "YOUR_GOOGLE_MAPS_API_KEY",
+    BACKEND_URL: "http://localhost:3000"
+  };
+</script>
+<script src="app.js"></script>
+</body>
+</html>
