@@ -1,22 +1,3 @@
-// ---------- tiny city -> nearest airport lookup ----------
-// Demo-scale only. Replace with a real airport/geocoding lookup
-// (e.g. an airports database keyed by lat/lng distance) before shipping.
-const AIRPORT_LOOKUP = [
-  { match: /london|westminster/i, iata: "LON", name: "London (all airports)" },
-  { match: /vienna|wien/i, iata: "VIE", name: "Vienna" },
-  { match: /paris/i, iata: "PAR", name: "Paris (all airports)" },
-  { match: /new york/i, iata: "NYC", name: "New York (all airports)" },
-  { match: /berlin/i, iata: "BER", name: "Berlin" },
-  { match: /rome|roma/i, iata: "ROM", name: "Rome (all airports)" },
-  { match: /madrid/i, iata: "MAD", name: "Madrid" },
-  { match: /amsterdam/i, iata: "AMS", name: "Amsterdam" },
-];
-
-function nearestAirport(placeText) {
-  const hit = AIRPORT_LOOKUP.find((a) => a.match.test(placeText));
-  return hit || null;
-}
-
 // ---------- state ----------
 let map, geocoder, directionsService, directionsRenderer, flightLine;
 let currentMode = "driving";
@@ -145,24 +126,19 @@ function renderGroundSheet(leg) {
 async function computeFlightRoute() {
   directionsRenderer.setMap(null);
 
-  const originAirport = nearestAirport(originPlace);
-  const destinationAirport = nearestAirport(destinationPlace);
-
-  if (!originAirport || !destinationAirport) {
-    renderEmptySheet(
-      "This demo only knows a handful of airports. Add more entries to AIRPORT_LOOKUP in app.js to cover your route."
-    );
-    updatePillLabel("flight", "--");
-    return;
-  }
-
   const date = document.getElementById("depart-date").value;
   sheetContent.innerHTML = `<p class="sheet-empty">Searching flights…</p>`;
 
   try {
     const response = await fetch(
-      `${CONFIG.BACKEND_URL}/api/flights?origin=${originAirport.iata}&destination=${destinationAirport.iata}&date=${date}`
+      `${CONFIG.BACKEND_URL}/api/flights?origin=${encodeURIComponent(originPlace)}&destination=${encodeURIComponent(destinationPlace)}&date=${date}`
     );
+
+    if (response.status === 404) {
+      renderEmptySheet("Couldn't find an airport near one of those places — try a bigger nearby city.");
+      updatePillLabel("flight", "--");
+      return;
+    }
 
     if (!response.ok) throw new Error("Backend returned an error");
     const data = await response.json();
@@ -173,9 +149,9 @@ async function computeFlightRoute() {
       return;
     }
 
-    drawFlightOverlay(originAirport, destinationAirport);
+    drawFlightOverlay(data.origin, data.destination);
     updatePillLabel("flight", data.offers[0].duration || "flights");
-    renderFlightSheet(originAirport, destinationAirport, date, data.offers);
+    renderFlightSheet(data.origin, data.destination, date, data.offers);
   } catch (err) {
     console.error(err);
     renderEmptySheet(
